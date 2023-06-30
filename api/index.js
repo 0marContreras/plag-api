@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-
+const cors = require('cors');
 // Conexión a MongoDB Atlas
 mongoose.connect('mongodb+srv://omarcontreras:Omar151003@omarcontreras.g6y4rxx.mongodb.net/plage', {
   useNewUrlParser: true,
@@ -39,9 +39,13 @@ const robotSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const Robot = mongoose.model('Robot', robotSchema);
 
+
 // Creación de la aplicación Express
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
 
 // Endpoint para obtener toda la información de los robots de un usuario
 app.get('/api/users/:userId/robots', async (req, res) => {
@@ -96,6 +100,35 @@ app.get('/api/robots/:code/coordinates', async (req, res) => {
     res.json({ x, y });
   } catch (error) {
     console.error('Error al obtener las coordenadas del robot:', error);
+    res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
+  }
+});
+
+
+// Endpoint para agregar un usuario
+app.post('/api/users/:userId/:displayName', async (req, res) => {
+  try {
+    const { userId, displayName } = req.params;
+
+    // Verificar si el usuario ya existe
+    const existingUser = await User.findOne({ userId });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'El usuario ya existe' });
+    }
+
+    // Crear un nuevo usuario
+    const newUser = new User({
+      userId,
+      displayName,
+      robots: []
+    });
+
+    await newUser.save();
+
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error('Error al agregar un usuario:', error);
     res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
   }
 });
