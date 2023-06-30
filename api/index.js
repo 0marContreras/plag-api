@@ -44,7 +44,7 @@ const app = express();
 app.use(express.json());
 
 // Endpoint para obtener toda la información de los robots de un usuario
-app.get('/users/:userId/robots', async (req, res) => {
+app.get('/api/users/:userId/robots', async (req, res) => {
   const { userId } = req.params;
   Robot.aggregate([
     {
@@ -80,7 +80,7 @@ app.get('/users/:userId/robots', async (req, res) => {
 
 
 // Endpoint para obtener las coordenadas x y de un robot por su código
-app.get('/robots/:code/coordinates', async (req, res) => {
+app.get('/api/robots/:code/coordinates', async (req, res) => {
   try {
     const { code } = req.params;
 
@@ -101,9 +101,11 @@ app.get('/robots/:code/coordinates', async (req, res) => {
 });
 
 // Puerto en el que se ejecutará el servidor
-const port = 3000;
+// const port = 3000;
 
-// Iniciar el servidor
-app.listen(port, () => {
-  console.log(`Servidor Express iniciado en el puerto ${port}`);
-});
+// // Iniciar el servidor
+// app.listen(port, () => {
+//   console.log(`Servidor Express iniciado en el puerto ${port}`);
+// });
+
+module.exports = app;
