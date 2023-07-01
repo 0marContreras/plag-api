@@ -14,10 +14,7 @@ mongoose.connect('mongodb+srv://omarcontreras:Omar151003@omarcontreras.g6y4rxx.m
 const userSchema = new mongoose.Schema({
   userId: String,
   displayName: String,
-  robots: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Robot'
-  }]
+  robots: []
 });
 
 const robotSchema = new mongoose.Schema({
@@ -133,12 +130,55 @@ app.post('/api/users/:userId/:displayName', async (req, res) => {
   }
 });
 
-// Puerto en el que se ejecutará el servidor
-// const port = 3000;
+app.get('/api/robots/:code/waste', async (req, res) =>{
 
-// // Iniciar el servidor
-// app.listen(port, () => {
-//   console.log(`Servidor Express iniciado en el puerto ${port}`);
-// });
+  try{
+
+    const { code } = req.params;
+    const robot = await Robot.findOne({ code });
+  
+    if (!robot) {
+      res.sendStatus(401).json({error: "el robot no fue encontrado"});
+    }
+  
+    const waste = robot.waste;
+    res.json(waste);
+  } catch(error) {
+      console.error("error encontrando la basura ", error);
+      res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
+  }
+ 
+
+});
+
+
+
+app.post('/api/users/:userId/link/:code', async (req, res) => {
+  try {
+    const { userId, code } = req.params;
+
+    const robot = await Robot.findOne({ code });
+    const user = await User.findOne({ userId });
+
+    if (!user) {
+      return res.status(401).json({ error: "El usuario no existe" });
+    }
+
+    if (!robot) {
+      return res.status(401).json({ error: "El robot no existe" });
+    }
+
+    // Agregar el nuevo robot al campo 'robots' del usuario
+    await User.findOneAndUpdate(
+      { userId },
+      { $push: { robots: {code: code } } }
+    );
+
+    res.json({ message: "Robot agregado exitosamente al usuario" });
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500).json({ error: "Ocurrió un error al procesar la solicitud" });
+  }
+});
 
 module.exports = app;
