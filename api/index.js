@@ -64,6 +64,7 @@ app.get('/api/users/:userId/robots', async (req, res) => {
     {
       $project: {
         "_id": 0,
+        "code": 1,
         "Rname": 1,
         "location": 1,
         "waste": 1
